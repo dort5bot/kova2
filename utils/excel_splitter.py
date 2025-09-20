@@ -1,12 +1,13 @@
 #Excel Ayırıcı (utils/excel_splitter.py)
 from openpyxl import load_workbook, Workbook
 from typing import Dict, List, Tuple, Any
+import tempfile
+import os
 
 from utils.group_manager import group_manager
 from utils.file_namer import generate_output_filename
 from utils.logger import logger
 from config import config
-import os
 
 class ExcelSplitter:
     def __init__(self):
@@ -14,6 +15,7 @@ class ExcelSplitter:
         self.sheets = {}     # group_id -> Worksheet
         self.row_counts = {} # group_id -> satır sayısı
         self.headers = []    # başlık satırı
+        self.city_mapping_stats = {}  # Şehir eşleştirme istatistikleri
     
     def initialize_workbook(self, group_id: str):
         """Yeni bir workbook ve worksheet oluşturur"""
@@ -29,87 +31,119 @@ class ExcelSplitter:
             self.workbooks[group_id] = wb
             self.sheets[group_id] = ws
             self.row_counts[group_id] = 1  # Başlık satırı
+            self.city_mapping_stats[group_id] = 0
     
     def process_excel_file(self, input_path: str, headers: List[str]) -> Dict[str, Any]:
-        """Excel dosyasını gruplara ayırır"""
+        """Excel dosyasını gruplara ayırır (optimize edilmiş)"""
+        wb = None  # Workbook'u burada tanımla
         try:
             self.headers = headers
+            self.city_mapping_stats = {}
             
-            # Sadece okuma modunda aç
+            # Read-only modunda aç (context manager OLMADAN)
             wb = load_workbook(filename=input_path, read_only=True)
             ws = wb.active
+                
+            total_rows = ws.max_row - 1  # Başlık hariç
+            logger.info(f"İşlenecek toplam satır: {total_rows}")
             
-            # Satırları işle (chunk bazlı)
-            chunk_size = 1000
+            # Tüm satırları iterate et
             processed_rows = 0
+            unmatched_cities = set()
             
-            for row_idx in range(2, ws.max_row + 1):  # Başlık satırını atla
-                # Satırı oku
-                row_data = []
-                for col in range(1, len(headers) + 1):
-                    cell_value = ws.cell(row=row_idx, column=col).value
-                    row_data.append(cell_value)
+            for row_idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+                if not any(row):  # Boş satırları atla
+                    continue
                 
                 # İl bilgisini al (B sütunu - index 1)
-                city = row_data[1] if len(row_data) > 1 else None
+                city = row[1] if len(row) > 1 else None
                 
-                # Grubu belirle
-                group_id = group_manager.get_group_for_city(city)
+                # Grubu belirle (birden fazla grup olabilir)
+                group_ids = group_manager.get_groups_for_city(city)
                 
-                # Workbook'u hazırla
-                self.initialize_workbook(group_id)
+                if "Grup_0" in group_ids and len(group_ids) == 1:
+                    unmatched_cities.add(str(city))
                 
-                # Satırı ilgili gruba yaz
-                ws_dest = self.sheets[group_id]
-                current_row = self.row_counts[group_id] + 1
+                # Her grup için satırı ekle
+                for group_id in group_ids:
+                    self.initialize_workbook(group_id)
+                    
+                    ws_dest = self.sheets[group_id]
+                    current_row = self.row_counts[group_id] + 1
+                    
+                    for col_idx, value in enumerate(row, 1):
+                        ws_dest.cell(row=current_row, column=col_idx, value=value)
+                    
+                    self.row_counts[group_id] = current_row
+                    self.city_mapping_stats[group_id] += 1
                 
-                for col_idx, value in enumerate(row_data, 1):
-                    ws_dest.cell(row=current_row, column=col_idx, value=value)
-                
-                self.row_counts[group_id] = current_row
                 processed_rows += 1
                 
-                # Chunk işleme - bellek yönetimi
-                if processed_rows % chunk_size == 0:
-                    logger.info(f"{processed_rows} satır işlendi")
+                # İlerleme logu (her 1000 satırda bir)
+                if processed_rows % 1000 == 0:
+                    logger.info(f"{processed_rows}/{total_rows} satır işlendi")
+            
+            logger.info(f"İşlem tamamlandı: {processed_rows} satır")
+            
+            # Eşleşmeyen şehirleri logla
+            if unmatched_cities:
+                logger.warning(f"Eşleşmeyen şehirler: {list(unmatched_cities)[:10]}{'...' if len(unmatched_cities) > 10 else ''}")
             
             # Dosyaları kaydet
             output_files = {}
             for group_id, wb in self.workbooks.items():
-                group_info = group_manager.get_group_info(group_id)
-                filename = generate_output_filename(group_info)
-                filepath = config.OUTPUT_DIR / filename
-                
-                wb.save(filepath)
-                output_files[group_id] = {
-                    "path": filepath,
-                    "row_count": self.row_counts[group_id] - 1,  # Başlık hariç
-                    "filename": filename
-                }
+                if self.row_counts[group_id] > 1:  # Sadece başlık değilse
+                    group_info = group_manager.get_group_info(group_id)
+                    filename = generate_output_filename(group_info)
+                    filepath = config.OUTPUT_DIR / filename
+                    
+                    # Dizin yoksa oluştur
+                    filepath.parent.mkdir(parents=True, exist_ok=True)
+                    
+                    wb.save(filepath)
+                    output_files[group_id] = {
+                        "path": filepath,
+                        "row_count": self.row_counts[group_id] - 1,  # Başlık hariç
+                        "filename": filename,
+                        "matched_cities": self.city_mapping_stats.get(group_id, 0)
+                    }
+            
+            matched_rows = sum(count - 1 for count in self.row_counts.values() if count > 1)
             
             return {
                 "success": True,
                 "output_files": output_files,
                 "total_rows": processed_rows,
-                "matched_rows": processed_rows - self.row_counts.get("Grup_0", 1) + 1
+                "matched_rows": matched_rows,
+                "unmatched_cities": list(unmatched_cities),
+                "stats": self.city_mapping_stats
             }
             
         except Exception as e:
-            logger.error(f"Excel ayırma hatası: {e}")
+            logger.error(f"Excel ayırma hatası: {e}", exc_info=True)
             return {"success": False, "error": str(e)}
         finally:
+            # Workbook'u kapat (eğer açıksa)
+            if wb is not None:
+                try:
+                    wb.close()
+                except:
+                    pass
+            
             # Belleği temizle
-            if 'wb' in locals():
-                wb.close()
             self.close_all_workbooks()
     
     def close_all_workbooks(self):
         """Tüm workbook'ları kapatır"""
         for wb in self.workbooks.values():
-            wb.close()
+            try:
+                wb.close()
+            except:
+                pass
         self.workbooks.clear()
         self.sheets.clear()
         self.row_counts.clear()
+        self.city_mapping_stats.clear()
 
 def split_excel_by_groups(input_path: str, headers: List[str]) -> Dict[str, Any]:
     """Excel dosyasını gruplara ayıran ana fonksiyon"""

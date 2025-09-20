@@ -80,4 +80,9 @@ def get_directory_size(path: Path) -> str:
     """
     Verilen dizindeki tüm dosyaların toplam boyutunu MB cinsinden döner.
     """
-    total_size_
+    total_size = 0  # total_size_ yerine total_size
+    for file_path in path.rglob('*'):
+        if file_path.is_file():
+            total_size += file_path.stat().st_size
+    
+    return f"{total_size / (1024 * 1024):.2f} MB"  # total_size_ yerine total_size

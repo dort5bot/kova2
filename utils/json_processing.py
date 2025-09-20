@@ -1,5 +1,5 @@
 # utils/json_processing.py
-#openpyxl ile
+# openpyxl ile
 import os
 import json
 import logging
@@ -61,6 +61,17 @@ async def process_excel_to_json(excel_file_path: str) -> str:
         if 'wb' in locals():
             wb.close()
 
+def get_column_letter(n: int) -> str:
+    """
+    Sütun numarasını Excel harfine çevirir.
+    Örnek: 1 -> 'A', 27 -> 'AA'
+    """
+    result = ""
+    while n > 0:
+        n, remainder = divmod(n - 1, 26)
+        result = chr(65 + remainder) + result
+    return result
+
 def extract_groups_data(worksheet) -> List[Dict[str, Any]]:
     """
     Worksheet'ten grup verilerini çıkarır.
@@ -77,8 +88,8 @@ def extract_groups_data(worksheet) -> List[Dict[str, Any]]:
     column_index = 4  # D sütunu = 4
     
     while True:
-        # Sütun harfini al (4 = D, 5 = E, vb.)
-        column_letter = chr(64 + column_index)
+        # Sütun harfini al (AA, AB, ... dahil)
+        column_letter = get_column_letter(column_index)
         
         # Grup ID kontrolü (1. satır)
         group_id_cell = f"{column_letter}1"

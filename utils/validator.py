@@ -1,4 +1,8 @@
 #Excel Doğrulayıcı (utils/validator.py)
+"""
+"TARİH", "İL" doğrulaması yapar
+
+"""
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from typing import Dict, Any
