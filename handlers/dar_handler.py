@@ -1,16 +1,16 @@
 # handlers/dar_handler.py
 """
-v2+1 komut sirali, 
-komut aciklama yok (commat_info)
-aktif dönemde anlamlı 
-kod kisa
+v3
+# handlers/dar_handler.py
+komut aciklaması yok (commat_info)> aktif dönemde anlamlı 
 # Aiogram 3.x uyumlu
 # Proje yedekleme ve komut tarama yardımcı handler
 . ile başlayan dosyalar ve __pycache__ gibi klasörler yok sayılır.
 /dar → proje ağaç yapısını mesaj olarak gösterir.
 /dar k → tüm @router.message(Command(...)) komutlarını bulur
-/dar t → dosyaların içeriğini birleştirip, her dosya için başlık ekleyerek mesaj halinde gönder.txt dosyası olarak gönderir.
+/dar t → proje ağaç yapısı + dosya içeriğini birleştirip, her dosya için başlık ekleyerek mesaj halinde .txt dosyası olarak gönderir.
 /dar Z → tüm proje klasörünü .zip dosyası olarak gönderir.
+# zaman format: mbot1_0917_2043 (aygün_saaddkika) ESKİ: "%Y%m%d_%H%M%S" = YılAyGün_SaatDakikaSaniye
 """
 
 import os
@@ -45,9 +45,11 @@ def generate_tree(path: Path, prefix: str = "") -> str:
     tree = ""
     entries = sorted(path.iterdir(), key=lambda e: (e.is_file(), e.name.lower()))
     for idx, entry in enumerate(entries):
+        if entry.name.startswith(".") or entry.name in ["__pycache__"]:
+            continue
         connector = "└── " if idx == len(entries) - 1 else "├── "
         tree += f"{prefix}{connector}{entry.name}\n"
-        if entry.is_dir() and not entry.name.startswith(".") and entry.name not in ["__pycache__"]:
+        if entry.is_dir():
             extension = "    " if idx == len(entries) - 1 else "│   "
             tree += generate_tree(entry, prefix + extension)
     return tree
@@ -84,7 +86,8 @@ async def dar_command(message: Message):
     args = message.text.strip().split()[1:]
     mode = args[0].lower() if args else ""
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # Yeni format: mbot1_0917_2043 (aygün_saaddkika) ESKİ: "%Y%m%d_%H%M%S" = YılAyGün_SaatDakikaSaniye
+    timestamp = datetime.now().strftime("%m%d_%H%M%S")
 
     # --- Komut Tarama (/dar k)
     if mode == "k":
@@ -94,11 +97,19 @@ async def dar_command(message: Message):
         await message.answer(f"<pre>{text}</pre>", parse_mode="HTML")
         return
 
-    # --- TXT Yedek (/dar t)
-       # --- TXT Kod Birleştir (/dar t)
+    # --- TXT Kod Birleştir (/dar t) - PROJE AĞAÇ YAPISI EKLENDİ
     if mode == "t":
         content_blocks = []
 
+        # Önce proje ağaç yapısını ekle
+        tree_str = generate_tree(PROJECT_ROOT)
+        content_blocks.append("📁 PROJE AĞAÇ YAPISI\n")
+        content_blocks.append(tree_str)
+        content_blocks.append("\n" + "="*50 + "\n")
+        content_blocks.append("📄 DOSYA İÇERİKLERİ\n")
+        content_blocks.append("="*50 + "\n")
+
+        # Sonra dosya içeriklerini ekle
         for dirpath, _, filenames in os.walk(PROJECT_ROOT):
             for fname in sorted(filenames):
                 if fname.startswith(".") or not fname.endswith(".py"):
@@ -138,7 +149,6 @@ async def dar_command(message: Message):
             await message.answer(f"<pre>{full_content}</pre>", parse_mode="HTML")
 
         return
-
 
     # --- ZIP Yedek (/dar Z)
     if mode.upper() == "Z":
