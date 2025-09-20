@@ -1,0 +1,26 @@
+version: "1"
+services:
+  - type: web
+    name: aiogram-bot
+    env: python
+    plan: free
+    pythonVersion: "3.12.9"  # Python 3.13 yerine bu daha kararlı
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.9
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: PORT
+        value: 10000
+      - key: BOT_TOKEN
+        fromSecret: BOT_TOKEN
+      - key: ADMIN_CHAT_IDS
+        fromSecret: ADMIN_CHAT_IDS
+    numInstances: 1
+    healthCheckPath: /health  # Health endpoint'in yoksa kaldırılabilir    healthCheckPath: /

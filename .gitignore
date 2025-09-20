@@ -1,0 +1,34 @@
+# ==============================================
+# HIDIR BOT - .gitignore
+# ==============================================
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+env/
+ENV/
+
+# OS
+.DS_Store
+Thumbs.db
+
+
+# 🎯 HIDIR Bot Specific
+/groups.json.backup
+/email_attachments/
+/processed_files/
+/backups/
+/archives/
+session.sqlite
+*.session
+.cache/
+*.cache
+
+# ==============================================
+# NOT: Bu dosya projenizin kök dizininde olmalıdır
+# ==============================================
+
