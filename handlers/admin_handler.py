@@ -201,6 +201,7 @@ async def show_group_management(message: Message):
         logger.error(f"Grup yönetimi hatası: {e}")
         await message.answer("❌ Grup bilgileri alınamadı.")
 
+# Admin handler'a grupları yenileme fonksiyonu ekleyin:
 @router.callback_query(F.data == "admin_refresh_groups")
 async def refresh_groups(callback: CallbackQuery):
     """Grupları yeniden yükler"""
@@ -210,12 +211,12 @@ async def refresh_groups(callback: CallbackQuery):
     
     try:
         # Grup manager'ı yeniden başlat
-        group_manager.groups = group_manager.load_groups()
-        group_manager.city_to_group = group_manager.build_city_mapping()
+        group_manager.refresh_groups()
         
         await callback.message.edit_text(
             "✅ Gruplar başarıyla yenilendi!\n"
-            f"Toplam {len(group_manager.groups.get('groups', []))} grup yüklendi."
+            f"Toplam {len(group_manager.groups.get('groups', []))} grup yüklendi.\n"
+            f"Şehir eşleştirme tablosu güncellendi."
         )
         
     except Exception as e:
