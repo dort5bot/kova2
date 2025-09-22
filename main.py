@@ -1,3 +1,4 @@
+###kova1> main.py
 import asyncio
 import os
 from aiogram import Bot, Dispatcher
@@ -174,6 +175,8 @@ async def main():
     dp.include_router(json_router)
     dp.include_router(file_router)
     
+    #dp.include_router(inline_router)
+    # dp.include_router(button_router)
 
 
 
