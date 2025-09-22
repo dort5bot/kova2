@@ -44,6 +44,10 @@ class Config:
     # Admin ID'leri
     ADMIN_CHAT_IDS: list[int] = field(default_factory=list)
     
+    # toplu gönderim maili
+    PERSONAL_EMAIL: str = os.getenv("PERSONAL_EMAIL", "dersdep@gmail.com")
+    
+    
     # SMTP ayarları - AKILLI PORT ALGILAMA - ÇOKLU PORT DESTEĞİ
     SMTP_SERVER: str = os.getenv("SMTP_SERVER", "smtp.gmail.com")
     SMTP_USERNAME: str = os.getenv("SMTP_USERNAME", "")
@@ -96,7 +100,13 @@ class Config:
                 self.SMTP_PORTS = [465]  # Yandex sadece 465
             else:
                 self.SMTP_PORTS = [465, 587]  # Diğerleri için her iki port
-                
+        
+        # PERSONAL_EMAIL kontrolü
+        if not self.PERSONAL_EMAIL:
+            logging.warning("⚠️ PERSONAL_EMAIL tanımlanmamış")
+            
+
+        
        # Dizin yapılandırması
         self.DATA_DIR = Path(__file__).parent / "data"
         self.INPUT_DIR = self.DATA_DIR / "input"
