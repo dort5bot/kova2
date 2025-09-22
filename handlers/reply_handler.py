@@ -1,10 +1,12 @@
 # handlers/reply_handler.py
 """
 Reply Keyboard → Kullanıcı dostu arayüz:
-1️⃣ Temizle → /clear
-2️⃣ Kova → /process
-3️⃣ JSON yap → /js
-4️⃣ Komutlar → /dar
+Temizle → /clear
+Kova → /process
+Bana → /bana
+JSON yap → /js
+Komutlar → /dar (bana komutunu ekle, tümünü bu maile atar)
+
 """
 
 import logging
@@ -31,8 +33,9 @@ class ReplyKeyboardSingleton:
             logger.debug("ReplyKeyboard oluşturuluyor...")
             cls._instance = ReplyKeyboardMarkup(
                 keyboard=[
-                    [KeyboardButton(text="1️⃣ Temizle"), KeyboardButton(text="2️⃣ Kova")],
-                    [KeyboardButton(text="3️⃣ JSON yap"), KeyboardButton(text="4️⃣ Komutlar")],
+                    [KeyboardButton(text="Temizle"), KeyboardButton(text="Kova"),KeyboardButton(text="Bana")],
+                    [KeyboardButton(text="JSON yap"),KeyboardButton(text="Komutlar")],
+                    #[KeyboardButton(text="Komutlar")],
                 ],
                 resize_keyboard=True,
                 one_time_keyboard=False,
@@ -78,7 +81,7 @@ async def cmd_reply_keyboard(message: Message) -> None:
 # Tuşların işlemleri
 # ---------------------------------------------------
 
-@router.message(lambda m: m.text == "1️⃣ Temizle")
+@router.message(lambda m: m.text == "Temizle")
 async def handle_clear(message: Message, state: FSMContext) -> None:
     """
     Reply keyboard → Temizle butonu (/clear)
@@ -90,7 +93,7 @@ async def handle_clear(message: Message, state: FSMContext) -> None:
     await clear_all(message)
 
 
-@router.message(lambda m: m.text == "2️⃣ Kova")
+@router.message(lambda m: m.text == "Kova")
 async def handle_process(message: Message, state: FSMContext) -> None:
     """
     Reply keyboard → İşle butonu (/process)
@@ -102,7 +105,19 @@ async def handle_process(message: Message, state: FSMContext) -> None:
     await cmd_process(message, state)
 
 
-@router.message(lambda m: m.text == "3️⃣ JSON yap")
+@router.message(lambda m: m.text == "Bana")
+async def handle_bana(message: Message, state: FSMContext) -> None:
+    """
+    Reply keyboard → Bana butonu (/bana)
+    """
+    logger.info("Bana komutu çalıştırılıyor: %s", message.from_user.id)
+    from handlers.upload_handler import cmd_bana
+
+    await message.answer("✉️ Bana işlemi başlatılıyor...")
+    await cmd_bana(message, state)
+
+
+@router.message(lambda m: m.text == "JSON yap")
 async def handle_create_json(message: Message, state: FSMContext) -> None:
     """
     Reply keyboard → JSON oluştur butonu (/js)
@@ -114,7 +129,7 @@ async def handle_create_json(message: Message, state: FSMContext) -> None:
     await handle_json_command(message, state)
 
 
-@router.message(lambda m: m.text == "4️⃣ Komutlar")
+@router.message(lambda m: m.text == "Komutlar")
 async def handle_show_commands(message: Message, state: FSMContext) -> None:
     """
     Reply keyboard → Komut listesi butonu (/dar)
