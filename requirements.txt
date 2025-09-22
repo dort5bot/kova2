@@ -1,4 +1,4 @@
-aiogram==3.0.0b7
+aiogram==3.0.0
 openpyxl==3.1.2
 aiofiles==23.1.0
 aiosmtplib==2.0.0
@@ -7,3 +7,4 @@ redis==4.5.5
 celery==5.2.7
 python-multipart==0.0.6
 loguru==0.7.0
+
