@@ -89,3 +89,28 @@ def generate_email_report(email_results: List[Dict]) -> str:
                 report.append(f"{i}. {result.get('recipient', 'Bilinmeyen')}: {result.get('error', 'Bilinmeyen hata')}")
     
     return "\n".join(report)
+    
+
+def generate_personal_email_report(result: Dict) -> str:
+    """Kişisel mail gönderim raporu oluşturur"""
+    if not result.get("success", False):
+        error_msg = result.get("error", "Bilinmeyen hata")
+        return f"❌ İşlem başarısız oldu:\n{error_msg}"
+    
+    total_rows = result.get("total_rows", 0)
+    email_sent_to = result.get("email_sent_to", "Bilinmeyen")
+    user_id = result.get("user_id", "Bilinmeyen")
+    
+    report_lines = [
+        "✅ **KİŞİSEL MAIL GÖNDERİM RAPORU**",
+        f"⏰ İşlem zamanı: {datetime.now().strftime('%d.%m.%Y %H:%M')}",
+        f"👤 Kullanıcı ID: {user_id}",
+        "",
+        "📊 **İSTATİSTİKLER:**",
+        f"• Toplam satır: {total_rows}",
+        f"• Gönderilen mail: {email_sent_to}",
+        "",
+        "📧 **DURUM:** Mail başarıyla gönderildi! ✅"
+    ]
+    
+    return "\n".join(report_lines)
