@@ -1,10 +1,9 @@
 import asyncio
 import os
 from aiogram import Bot, Dispatcher
-from aiogram import Bot
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
-#from aiogram.client.default import DefaultBotProperties
+from aiogram.client.default import DefaultBotProperties
 from aiohttp import web
 
 from config import config
@@ -161,7 +160,7 @@ async def main():
 
     bot = Bot(
         token=config.TELEGRAM_TOKEN,
-        parse_mode=ParseMode.HTML
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
     dp = Dispatcher(storage=storage)
 
@@ -223,5 +222,4 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-
         print("✅ Bot kapatıldı")
