@@ -33,10 +33,10 @@ class ReplyKeyboardSingleton:
             logger.debug("ReplyKeyboard oluşturuluyor...")
             cls._instance = ReplyKeyboardMarkup(
                 keyboard=[
-                    [KeyboardButton(text="Temizle"), KeyboardButton(text="Kova"),KeyboardButton(text="Bana")],
-                    [KeyboardButton(text="JSON yap"),KeyboardButton(text="Komutlar")],
-                    #[KeyboardButton(text="Komutlar")],
+                    [KeyboardButton(text="Temizle"), KeyboardButton(text="Kova"), KeyboardButton(text="TEK")],
+                    [KeyboardButton(text="JSON yap"), KeyboardButton(text="Bana"),KeyboardButton(text="Komutlar")],
                 ],
+
                 resize_keyboard=True,
                 one_time_keyboard=False,
                 input_field_placeholder="Bir işlem seçin...",
@@ -81,7 +81,8 @@ async def cmd_reply_keyboard(message: Message) -> None:
 # Tuşların işlemleri
 # ---------------------------------------------------
 
-@router.message(lambda m: m.text == "Temizle")
+#@router.message(lambda m: m.text == "Temizle")
+@router.message(lambda m: m.text and m.text == "Temizle")
 async def handle_clear(message: Message, state: FSMContext) -> None:
     """
     Reply keyboard → Temizle butonu (/clear)
@@ -116,6 +117,14 @@ async def handle_bana(message: Message, state: FSMContext) -> None:
     await message.answer("✉️ Bana işlemi başlatılıyor...")
     await cmd_bana(message, state)
 
+
+# TEK butonu handler'ı ekle
+@router.message(lambda m: m.text == "TEK")
+async def handle_tek(message: Message, state: FSMContext):
+    """Reply keyboard → TEK butonu (/tek)"""
+    from handlers.tek_handler import cmd_tek
+    await message.answer("⚙️ TEK işlem başlatılıyor...")
+    await cmd_tek(message, state)
 
 @router.message(lambda m: m.text == "JSON yap")
 async def handle_create_json(message: Message, state: FSMContext) -> None:
