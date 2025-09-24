@@ -1,5 +1,5 @@
 #KOVA   main.py
-# kova için, /process komutu hem gruplama yapacak hem de tüm çıktıları ZIP olarak maile gönder
+#
 import asyncio
 import os
 from aiogram import Bot, Dispatcher
@@ -18,9 +18,9 @@ from handlers.id_handler import router as id_router
 from handlers.json_handler import router as json_router
 from handlers.file_handler import router as file_router
 from handlers.tek_handler import router as tek_router
+from handlers.cancel_handler import router as cancel_router
 
-#from handlers.buttons.button_handler import router as button_router
-#from handlers.inline_handler import router as inline_router
+
 
 
 from utils.logger import setup_logger
@@ -168,6 +168,7 @@ async def main():
     dp = Dispatcher(storage=storage)
 
     # Router'ları yükle
+    dp.include_router(cancel_router)  # cancel_handler
     dp.include_router(reply_router)
     dp.include_router(upload_router)
     dp.include_router(status_router)
