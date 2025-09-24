@@ -65,9 +65,6 @@ class Config:
     LOG_RETENTION_DAYS = 30  # Log tutma süresi
     
     
-    # Yeni ayar: Output zip gönderimini kontrol et
-    SEND_OUTPUT_ZIP: bool = field(default_factory=lambda: os.getenv("SEND_OUTPUT_ZIP", "True").lower() == "true")
-    
     
     # Redis (eğer kullanıyorsanız)
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
