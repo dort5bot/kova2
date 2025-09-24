@@ -4,7 +4,7 @@
       "group_id": "grup_0",
       "group_name": "grup_0",
       "email_recipients": [
-        "anadolulistehdr@gmail.com"
+        "anadoluhasarhidir@gmail.com"
       ],
       "cities": []
     },
@@ -12,7 +12,6 @@
       "group_id": "grup_1",
       "group_name": "antalya_sube",
       "email_recipients": [
-        "anadolugroupsigorta@gmail.com",
         "anadoluexpert.nurhan@gmail.com"
       ],
       "cities": [
@@ -35,7 +34,6 @@
       "group_id": "grup_2",
       "group_name": "mersin_sube",
       "email_recipients": [
-        "anadolugroupsigorta@gmail.com",
         "ortadogudanismanlikk@gmail.com"
       ],
       "cities": [
@@ -60,14 +58,15 @@
         "Şanlıurfa",
         "Şırnak",
         "Van",
-        "Urfa"
+        "Urfa",
+        "içel",
+        "İçel"
       ]
     },
     {
       "group_id": "grup_3",
       "group_name": "izmir_sube",
       "email_recipients": [
-        "anadolugroupsigorta@gmail.com",
         "sinansevimli04@gmail.com",
         "ceylanizmiranadolu@gmail.com"
       ],
@@ -91,7 +90,6 @@
       "group_id": "grup_4",
       "group_name": "bursa_sube",
       "email_recipients": [
-        "anadolugroupsigorta@gmail.com",
         "hasaranalizmerkezi16@gmail.com"
       ],
       "cities": [
@@ -109,7 +107,6 @@
       "group_id": "grup_5",
       "group_name": "balıkesir_sube",
       "email_recipients": [
-        "anadolugroupsigorta@gmail.com",
         "sevketozel145@gmail.com"
       ],
       "cities": [
@@ -122,7 +119,6 @@
       "group_id": "grup_6",
       "group_name": "karadeniz_sube",
       "email_recipients": [
-        "anadolugroupsigorta@gmail.com",
         "batikaradenizemel@gmail.com"
       ],
       "cities": [
@@ -144,9 +140,8 @@
     },
     {
       "group_id": "grup_7",
-      "group_name": "erzinca_sube",
+      "group_name": "erzincan_sube",
       "email_recipients": [
-        "anadolugroupsigorta@gmail.com",
         "serkan.ovayurt1903@gmail.com"
       ],
       "cities": [
@@ -163,14 +158,14 @@
         "Tunceli",
         "Van",
         "Ağrı",
-        "Iğdır"
+        "Iğdır",
+        "Ardahan"
       ]
     },
     {
       "group_id": "grup_8",
       "group_name": "eskişehir_sube",
       "email_recipients": [
-        "anadolugroupsigorta@gmail.com",
         "anadolugrupesk@gmail.com"
       ],
       "cities": [
@@ -186,7 +181,6 @@
       "group_id": "grup_9",
       "group_name": "kütahya_sube",
       "email_recipients": [
-        "anadolugroupsigorta@gmail.com",
         "anadoluhasarnursen@gmail.com"
       ],
       "cities": [
@@ -206,7 +200,6 @@
       "group_id": "grup_10",
       "group_name": "corum_sube",
       "email_recipients": [
-        "anadolugroupsigorta@gmail.com",
         "corumhasar19@gmail.com"
       ],
       "cities": [
@@ -227,7 +220,6 @@
       "group_id": "grup_11",
       "group_name": "denizli_sube",
       "email_recipients": [
-        "anadolugroupsigorta@gmail.com",
         "osman.anadoluhasar@gmail.com"
       ],
       "cities": [
@@ -250,7 +242,6 @@
       "group_id": "grup_12",
       "group_name": "akhisar_sube",
       "email_recipients": [
-        "anadolugroupsigorta@gmail.com",
         "halilakhisar@gmail.com"
       ],
       "cities": [
@@ -261,7 +252,6 @@
       "group_id": "grup_13",
       "group_name": "düzce_sube",
       "email_recipients": [
-        "anadolugroupsigorta@gmail.com",
         "omurburhankorkmaz@anadoluexpert.com"
       ],
       "cities": [
@@ -282,7 +272,7 @@
     },
     {
       "group_id": "grup_14",
-      "group_name": "nigde_sube",
+      "group_name": "niğde_sube",
       "email_recipients": [
         "anadolu.group51@hotmail.com"
       ],
@@ -293,6 +283,72 @@
         "Niğde",
         "Karaman"
       ]
+    },
+    {
+      "group_id": "grup_15",
+      "group_name": "",
+      "email_recipients": [],
+      "cities": []
+    },
+    {
+      "group_id": "grup_16",
+      "group_name": "",
+      "email_recipients": [],
+      "cities": []
+    },
+    {
+      "group_id": "grup_17",
+      "group_name": "",
+      "email_recipients": [],
+      "cities": []
+    },
+    {
+      "group_id": "grup_18",
+      "group_name": "",
+      "email_recipients": [],
+      "cities": []
+    },
+    {
+      "group_id": "grup_19",
+      "group_name": "",
+      "email_recipients": [],
+      "cities": []
+    },
+    {
+      "group_id": "grup_20",
+      "group_name": "",
+      "email_recipients": [],
+      "cities": []
+    },
+    {
+      "group_id": "grup_21",
+      "group_name": "",
+      "email_recipients": [],
+      "cities": []
+    },
+    {
+      "group_id": "grup_22",
+      "group_name": "",
+      "email_recipients": [],
+      "cities": []
+    },
+    {
+      "group_id": "grup_23",
+      "group_name": "",
+      "email_recipients": [],
+      "cities": []
+    },
+    {
+      "group_id": "grup_24",
+      "group_name": "",
+      "email_recipients": [],
+      "cities": []
+    },
+    {
+      "group_id": "grup_25",
+      "group_name": "",
+      "email_recipients": [],
+      "cities": []
     }
   ]
 }
