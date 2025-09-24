@@ -18,7 +18,7 @@ from aiogram.fsm.context import FSMContext
 logger = logging.getLogger(__name__)
 router = Router()
 
-#❌ İptal
+#iptal
 class ReplyKeyboardSingleton:
     """
     Singleton sınıfı: sadece bir tane ReplyKeyboard üretir.
@@ -34,7 +34,7 @@ class ReplyKeyboardSingleton:
             cls._instance = ReplyKeyboardMarkup(
                 keyboard=[
                     [KeyboardButton(text="Temizle"), KeyboardButton(text="Kova"), KeyboardButton(text="TEK")],
-                    [KeyboardButton(text="❌ İptal"),KeyboardButton(text="JSON yap"), KeyboardButton(text="Bana"),KeyboardButton(text="Komutlar")],
+                    [KeyboardButton(text="iptal"),KeyboardButton(text="JSON yap"), KeyboardButton(text="Komutlar")],
                 ],
 
                 resize_keyboard=True,
@@ -95,7 +95,7 @@ async def handle_clear(message: Message, state: FSMContext) -> None:
 
 
 # İptal butonu handler'ı ekleyin
-@router.message(lambda m: m.text and m.text == "❌ İptal")
+@router.message(lambda m: m.text and m.text == "iptal")
 async def handle_cancel_button(message: Message, state: FSMContext):
     """Reply keyboard'dan iptal işlemi"""
     current_state = await state.get_state()
@@ -123,17 +123,6 @@ async def handle_process(message: Message, state: FSMContext) -> None:
     await message.answer("⚙️ İşlem başlatılıyor...")
     await cmd_process(message, state)
 
-
-@router.message(lambda m: m.text == "Bana")
-async def handle_bana(message: Message, state: FSMContext) -> None:
-    """
-    Reply keyboard → Bana butonu (/bana)
-    """
-    logger.info("Bana komutu çalıştırılıyor: %s", message.from_user.id)
-    from handlers.upload_handler import cmd_bana
-
-    await message.answer("✉️ Bana işlemi başlatılıyor...")
-    await cmd_bana(message, state)
 
 
 # TEK butonu handler'ı ekle
@@ -169,3 +158,4 @@ async def handle_show_commands(message: Message, state: FSMContext) -> None:
     text = "\n".join(lines) if lines else "❌ Komut bulunamadı."
 
     await message.answer(f"<pre>{text}</pre>", parse_mode="HTML")
+
