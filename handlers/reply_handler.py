@@ -3,9 +3,9 @@
 Reply Keyboard → Kullanıcı dostu arayüz:
 Temizle → /clear
 Kova → /process
- → /
+tek → /tek
 JSON yap → /js
-Komutlar → /dar (
+Komutlar → /dar (bana komutunu ekle, tümünü bu maile atar)
 
 """
 
@@ -18,7 +18,7 @@ from aiogram.fsm.context import FSMContext
 logger = logging.getLogger(__name__)
 router = Router()
 
-
+#❌ İptal
 class ReplyKeyboardSingleton:
     """
     Singleton sınıfı: sadece bir tane ReplyKeyboard üretir.
@@ -34,7 +34,7 @@ class ReplyKeyboardSingleton:
             cls._instance = ReplyKeyboardMarkup(
                 keyboard=[
                     [KeyboardButton(text="Temizle"), KeyboardButton(text="Kova"), KeyboardButton(text="TEK")],
-                    [KeyboardButton(text="JSON yap"), KeyboardButton(text="Komutlar")],
+                    [KeyboardButton(text="❌ İptal"),KeyboardButton(text="JSON yap"), KeyboardButton(text="Komutlar")],
                 ],
 
                 resize_keyboard=True,
@@ -94,6 +94,24 @@ async def handle_clear(message: Message, state: FSMContext) -> None:
     await clear_all(message)
 
 
+# İptal butonu handler'ı ekleyin
+@router.message(lambda m: m.text and m.text == "❌ İptal")
+async def handle_cancel_button(message: Message, state: FSMContext):
+    """Reply keyboard'dan iptal işlemi"""
+    current_state = await state.get_state()
+    
+    if current_state is None:
+        await message.answer("ℹ️ İptal edilecek aktif işlem yok.")
+        return
+    
+    await state.clear()
+    await message.answer(
+        "❌ İşlem iptal edildi.\n"
+        "Yeni bir işlem başlatmak için menüden seçim yapabilirsiniz.",
+        reply_markup=ReplyKeyboardSingleton.get_keyboard()
+    )
+
+
 @router.message(lambda m: m.text == "Kova")
 async def handle_process(message: Message, state: FSMContext) -> None:
     """
@@ -104,8 +122,6 @@ async def handle_process(message: Message, state: FSMContext) -> None:
 
     await message.answer("⚙️ İşlem başlatılıyor...")
     await cmd_process(message, state)
-
-
 
 
 # TEK butonu handler'ı ekle
