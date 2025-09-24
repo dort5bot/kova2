@@ -8,11 +8,8 @@ from config import config
 from utils.excel_cleaner import clean_excel_headers
 from utils.excel_splitter import split_excel_by_groups
 from utils.validator import validate_excel_file
-#from utils.reporter import generate_processing_report
-from utils.reporter import generate_processing_report, generate_personal_email_report
-from utils.file_namer import generate_output_filename
-#from jobs.process_excel import process_excel_task
-from jobs.process_excel import process_excel_task, process_excel_task_for_personal_email
+from utils.reporter import generate_processing_report
+from jobs.process_excel import process_excel_task_with_zip
 
 from utils.logger import logger
 
@@ -32,15 +29,13 @@ async def cmd_start(message: Message):
 @router.message(Command("process"))
 async def cmd_process(message: Message, state: FSMContext):
     await state.set_state(ProcessingStates.waiting_for_file)
-    await message.answer("Lütfen işlemek istediğiniz Excel dosyasını gönderin.")
-
-
-@router.message(Command("bana"))
-async def cmd_bana(message: Message, state: FSMContext):
-    """Sadece kişisel maile gönderim için dosya bekler"""
-    await state.set_state(ProcessingStates.waiting_for_file)
-    await message.answer("📧 Sadece bana gönderim için Excel dosyasını gönderin.")
-
+    await message.answer(
+        "📊 PROCESS MODU\n\n"
+        "Lütfen Excel dosyasını gönderin.\n"
+        "• Dosya gruplara ayrılacak\n"
+        "• Tüm çıktılar ZIP olarak kişisel maile gönderilecek\n"
+        f"• Alıcı: {config.PERSONAL_EMAIL}"
+    )
 
 @router.message(ProcessingStates.waiting_for_file, F.document)
 async def handle_excel_upload(message: Message, state: FSMContext):
@@ -61,7 +56,9 @@ async def handle_excel_upload(message: Message, state: FSMContext):
         await bot.download_file(file.file_path, file_path)
         
         # Doğrulama
-        validation_result = validate_excel_file(file_path)
+        #validation_result = validate_excel_file(file_path)
+        # Doğrulama kısmını düzeltin:
+        validation_result = validate_excel_file(str(file_path))  # Path yerine str
         if not validation_result["valid"]:
             await message.answer(f"❌ {validation_result['message']}")
             await state.clear()
@@ -70,22 +67,12 @@ async def handle_excel_upload(message: Message, state: FSMContext):
         
         await message.answer("⏳ Dosya işleniyor, lütfen bekleyin...")
         
-        # Komuta göre farklı işlem yap
-        if message.text and message.text.startswith('/bana'):
-            # /bana komutu için kişisel mail gönderimi
-            task_result = await process_excel_task_for_personal_email(file_path, message.from_user.id)
-        else:
-            # /process komutu için normal grup işlemi
-            task_result = await process_excel_task(file_path, message.from_user.id)
+        # /process komutu için ZIP gönderimli işlem
+        task_result = await process_excel_task_with_zip(file_path, message.from_user.id)
         
         if task_result["success"]:
             # Rapor oluştur
-            if message.text and message.text.startswith('/bana'):
-                report = generate_personal_email_report(task_result)
-            else:
-                report = generate_processing_report(task_result)
-            
-            # Kullanıcıya rapor gönder
+            report = generate_processing_report(task_result)
             await message.answer(report)
             
         else:
@@ -96,7 +83,6 @@ async def handle_excel_upload(message: Message, state: FSMContext):
         await message.answer("❌ Dosya işlenirken bir hata oluştu.")
     finally:
         await state.clear()
-
 
 @router.message(ProcessingStates.waiting_for_file)
 async def handle_wrong_file_type(message: Message):

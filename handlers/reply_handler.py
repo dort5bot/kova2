@@ -3,9 +3,9 @@
 Reply Keyboard → Kullanıcı dostu arayüz:
 Temizle → /clear
 Kova → /process
-Bana → /bana
+ → /
 JSON yap → /js
-Komutlar → /dar (bana komutunu ekle, tümünü bu maile atar)
+Komutlar → /dar (
 
 """
 
@@ -34,7 +34,7 @@ class ReplyKeyboardSingleton:
             cls._instance = ReplyKeyboardMarkup(
                 keyboard=[
                     [KeyboardButton(text="Temizle"), KeyboardButton(text="Kova"), KeyboardButton(text="TEK")],
-                    [KeyboardButton(text="JSON yap"), KeyboardButton(text="Bana"),KeyboardButton(text="Komutlar")],
+                    [KeyboardButton(text="JSON yap"), KeyboardButton(text="Komutlar")],
                 ],
 
                 resize_keyboard=True,
@@ -106,16 +106,6 @@ async def handle_process(message: Message, state: FSMContext) -> None:
     await cmd_process(message, state)
 
 
-@router.message(lambda m: m.text == "Bana")
-async def handle_bana(message: Message, state: FSMContext) -> None:
-    """
-    Reply keyboard → Bana butonu (/bana)
-    """
-    logger.info("Bana komutu çalıştırılıyor: %s", message.from_user.id)
-    from handlers.upload_handler import cmd_bana
-
-    await message.answer("✉️ Bana işlemi başlatılıyor...")
-    await cmd_bana(message, state)
 
 
 # TEK butonu handler'ı ekle
