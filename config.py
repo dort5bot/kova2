@@ -28,6 +28,12 @@ for key in ['TELEGRAM_TOKEN', 'ADMIN_CHAT_IDS', 'USE_WEBHOOK', 'WEBHOOK_URL', 'W
     else:
         logging.warning(f"  {key}: TANIMSIZ")
 
+# config.py'ye ekleyin
+class ProcessMode:
+    NORMAL = "normal"
+    PERSONAL = "personal" 
+    ZIP = "zip"
+
 @dataclass
 class Config:
     # Ana bot token - main.py'de TELEGRAM_TOKEN olarak kullanılıyor
@@ -104,7 +110,8 @@ class Config:
         # PERSONAL_EMAIL kontrolü
         if not self.PERSONAL_EMAIL:
             logging.warning("⚠️ PERSONAL_EMAIL tanımlanmamış")
-            
+        else:
+            logging.info(f"✅ PERSONAL_EMAIL yüklendi: {self.PERSONAL_EMAIL}")    
 
         
        # Dizin yapılandırması

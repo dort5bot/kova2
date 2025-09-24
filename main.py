@@ -1,5 +1,5 @@
 #KOVA   main.py
-#
+# kova için, /process komutu hem gruplama yapacak hem de tüm çıktıları ZIP olarak maile gönder
 import asyncio
 import os
 from aiogram import Bot, Dispatcher
