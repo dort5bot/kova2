@@ -82,8 +82,7 @@ async def handle_excel_upload(message: Message, state: FSMContext):
         await bot.download_file(file.file_path, file_path)
         
         # Doğrulama
-        ##validation_result = validate_excel_file(file_path)
-        validation_result = validate_excel_file(str(file_path))
+        validation_result = validate_excel_file(file_path)
         if not validation_result["valid"]:
             await message.answer(f"❌ {validation_result['message']}")
             await state.clear()
