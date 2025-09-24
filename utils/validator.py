@@ -8,8 +8,7 @@ from openpyxl.utils import get_column_letter
 from typing import Dict, Any
 from utils.logger import logger
 
-#def validate_excel_file(file_path: str) -> Dict[str, Any]:
-def validate_excel_file(file_path: str) -> Dict[str, Any]:  # Path değil str kabul et
+def validate_excel_file(file_path: str) -> Dict[str, Any]:
     """
     Excel dosyasını doğrular
     """
