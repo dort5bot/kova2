@@ -1,4 +1,8 @@
 #Excel Temizleyici (utils/excel_cleaner.py)
+# sütun genişliği ayarı eklendi
+#Sütun genişliği otomatik olarak içeriğe göre ayarlanır, minimum 10, maksimum 25 birim
+
+
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from typing import Dict, List, Tuple, Any
@@ -52,6 +56,7 @@ def clean_excel_headers(input_path: str) -> Dict[str, Any]:
         new_headers.extend(other_headers)
         
         # Yeni bir çalışma sayfası oluştur
+        # Yeni bir çalışma sayfası oluştur
         from openpyxl import Workbook
         new_wb = Workbook()
         new_ws = new_wb.active
@@ -83,6 +88,17 @@ def clean_excel_headers(input_path: str) -> Dict[str, Any]:
             
             new_row_idx += 1
         
+        
+        # Sütun genişliklerini ayarla
+        from openpyxl.utils import get_column_letter
+        for column_cells in new_ws.columns:
+            length = max(len(str(cell.value)) if cell.value else 0 for cell in column_cells)
+            column_letter = get_column_letter(column_cells[0].column)
+            new_ws.column_dimensions[column_letter].width = min(25, max(length + 2, 10))
+        
+        
+                
+        # Geçici dosyaya kaydet
         # Geçici dosyaya kaydet
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx")
         temp_path = temp_file.name

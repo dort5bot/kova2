@@ -1,5 +1,10 @@
-#Excel Ayırıcı (utils/excel_splitter.py)
+# utils/excel_splitter.py (güncellenmiş versiyon)
+"""
+Excel dosyasını gruplara ayıran ana fonksiyon
+
+"""
 from openpyxl import load_workbook, Workbook
+from openpyxl.utils import get_column_letter
 from typing import Dict, List, Tuple, Any
 import tempfile
 import os
@@ -28,10 +33,25 @@ class ExcelSplitter:
             for col_idx, header in enumerate(self.headers, 1):
                 ws.cell(row=1, column=col_idx, value=header)
             
+            # Sütun genişliklerini ayarla (25 birim)
+            self.adjust_column_widths(ws)
+            
             self.workbooks[group_id] = wb
             self.sheets[group_id] = ws
             self.row_counts[group_id] = 1  # Başlık satırı
             self.city_mapping_stats[group_id] = 0
+    
+    def adjust_column_widths(self, worksheet, width: int = 25):
+        """
+        Tüm sütunların genişliğini ayarlar
+        Args:
+            worksheet: Çalışma sayfası nesnesi
+            width: Sütun genişliği (varsayılan: 25)
+        """
+        for column_cells in worksheet.columns:
+            length = max(len(str(cell.value)) if cell.value else 0 for cell in column_cells)
+            column_letter = get_column_letter(column_cells[0].column)
+            worksheet.column_dimensions[column_letter].width = min(width, max(length + 2, 10))
     
     def process_excel_file(self, input_path: str, headers: List[str]) -> Dict[str, Any]:
         """Excel dosyasını gruplara ayırır (optimize edilmiş)"""
@@ -88,6 +108,11 @@ class ExcelSplitter:
             # Eşleşmeyen şehirleri logla
             if unmatched_cities:
                 logger.warning(f"Eşleşmeyen şehirler: {list(unmatched_cities)[:10]}{'...' if len(unmatched_cities) > 10 else ''}")
+            
+            # Dosyaları kaydetmeden önce sütun genişliklerini güncelle
+            for group_id, wb in self.workbooks.items():
+                if self.row_counts[group_id] > 1:  # Sadece başlık değilse
+                    self.adjust_column_widths(self.sheets[group_id])
             
             # Dosyaları kaydet
             output_files = {}
