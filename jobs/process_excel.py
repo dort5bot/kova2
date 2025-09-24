@@ -5,8 +5,6 @@ from pathlib import Path
 from typing import Dict, Any, List
 from openpyxl import load_workbook
 import tempfile
-import zipfile
-from datetime import datetime
 
 from utils.excel_cleaner import clean_excel_headers
 from utils.excel_splitter import split_excel_by_groups
@@ -15,63 +13,9 @@ from utils.group_manager import group_manager
 from utils.logger import logger
 import config  # config modülünü import etmeyi unutmayın
 
-async def zip_and_send_output_folder(task_result: Dict, original_filename: str) -> bool:
-    """Output klasörünü zipleyip PERSONAL_EMAIL'e gönderir"""
-    try:
-        if not config.config.PERSONAL_EMAIL:
-            logger.warning("PERSONAL_EMAIL tanımlı değil, zip gönderilmeyecek")
-            return False
-        
-        # Output klasörü kontrolü
-        if not config.config.OUTPUT_DIR.exists() or not any(config.config.OUTPUT_DIR.iterdir()):
-            logger.warning("Output klasörü boş, zip gönderilmeyecek")
-            return False
-        
-        # Zip dosyası oluştur
-        timestamp = datetime.now().strftime("%m%d_%H%M")  # output_0924_2136 formatı
-        zip_filename = f"output_{timestamp}.zip"
-        zip_path = config.config.OUTPUT_DIR.parent / zip_filename  # data klasörüne kaydet
-        
-        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            for file_path in config.config.OUTPUT_DIR.glob('*.xlsx'):
-                zipf.write(file_path, file_path.name)
-        
-        # Mail gönder
-        subject = f"📊 Output Klasörü - {original_filename}"
-        body = (
-            f"Merhaba,\n\n"
-            f"{original_filename} işlemi tamamlandı.\n"
-            f"Output klasöründeki {len(list(config.config.OUTPUT_DIR.glob('*.xlsx')))} dosya ektedir.\n\n"
-            f"İşlem detayları:\n"
-            f"- Toplam satır: {task_result.get('total_rows', 0)}\n"
-            f"- Eşleşen satır: {task_result.get('matched_rows', 0)}\n"
-            f"- Oluşan grup: {len(task_result.get('output_files', {}))}\n\n"
-            f"İyi çalışmalar,\nExcel Bot"
-        )
-        
-        success = await send_email_with_attachment(
-            [config.config.PERSONAL_EMAIL], subject, body, zip_path
-        )
-        
-        # Geçici zip dosyasını sil
-        zip_path.unlink()
-        
-        if success:
-            logger.info(f"Output zip başarıyla gönderildi: {zip_filename}")
-        else:
-            logger.error(f"Output zip gönderilemedi: {zip_filename}")
-            
-        return success
-        
-    except Exception as e:
-        logger.error(f"Output zip gönderme hatası: {e}")
-        return False
-
 async def process_excel_task(input_path: Path, user_id: int) -> Dict[str, Any]:
-    """Excel işleme görevini yürütür (output zip özellikli)"""
+    """Excel işleme görevini yürütür (geliştirilmiş)"""
     cleaning_result = None
-    original_filename = input_path.name  # Orijinal dosya adını kaydet
-    
     try:
         logger.info(f"Excel işleme başlatıldı: {input_path.name}, Kullanıcı: {user_id}")
 
@@ -165,8 +109,7 @@ async def process_excel_task(input_path: Path, user_id: int) -> Dict[str, Any]:
         except Exception as e:
             logger.warning(f"Geçici dosya silinemedi: {e}")
         
-        # Başarılı task sonucunu oluştur
-        task_result = {
+        return {
             "success": True,
             "output_files": output_files,
             "total_rows": splitting_result["total_rows"],
@@ -174,16 +117,6 @@ async def process_excel_task(input_path: Path, user_id: int) -> Dict[str, Any]:
             "email_results": email_results,
             "user_id": user_id
         }
-        
-        # 5. Output klasörünü zipleyip gönder (YENİ EKLENEN KISIM)
-        if task_result["success"]:
-            try:
-                await zip_and_send_output_folder(task_result, original_filename)
-            except Exception as e:
-                logger.error(f"Output zip gönderim hatası: {e}")
-                # Zip hatası ana işlemi başarısız yapmasın
-        
-        return task_result
         
     except Exception as e:
         logger.error(f"İşlem görevi hatası: {e}", exc_info=True)
@@ -198,8 +131,12 @@ async def process_excel_task(input_path: Path, user_id: int) -> Dict[str, Any]:
             pass
             
         return {"success": False, "error": str(e)}
+        
+
+
 
 #kişisel mail fonksiyonu
+#
 async def process_excel_task_for_personal_email(input_path: Path, user_id: int) -> Dict[str, Any]:
     """Sadece kişisel maile gönderim için Excel işleme görevi"""
     cleaning_result = None
@@ -235,7 +172,7 @@ async def process_excel_task_for_personal_email(input_path: Path, user_id: int) 
         
         # 3. Sadece kişisel maile gönder
         email_success = False
-        if config.config.PERSONAL_EMAIL:
+        if config.PERSONAL_EMAIL:
             subject = f"📊 Excel Raporu - {input_path.name}"
             body = (
                 f"Merhaba,\n\n"
@@ -244,7 +181,7 @@ async def process_excel_task_for_personal_email(input_path: Path, user_id: int) 
             )
             
             email_success = await send_email_with_attachment(
-                [config.config.PERSONAL_EMAIL], subject, body, Path(temp_output_path)
+                [config.PERSONAL_EMAIL], subject, body, Path(temp_output_path)
             )
         
         # 4. Geçici dosyaları temizle
@@ -261,7 +198,7 @@ async def process_excel_task_for_personal_email(input_path: Path, user_id: int) 
         return {
             "success": email_success,
             "total_rows": cleaning_result["row_count"],
-            "email_sent_to": config.config.PERSONAL_EMAIL if email_success else None,
+            "email_sent_to": config.PERSONAL_EMAIL if email_success else None,
             "user_id": user_id
         }
         
