@@ -168,8 +168,8 @@ async def main():
     dp = Dispatcher(storage=storage)
 
     # Router'ları yükle
-    dp.include_router(cancel_router)  # cancel_handler
     dp.include_router(reply_router)
+    dp.include_router(cancel_router)  # cancel_handler
     dp.include_router(upload_router)
     dp.include_router(status_router)
     dp.include_router(admin_router)
@@ -226,4 +226,5 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
+
         print("✅ Bot kapatıldı")
